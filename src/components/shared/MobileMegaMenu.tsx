@@ -180,14 +180,14 @@ const MobileMegaMenu = ({
             <Dialog.Panel className="relative flex w-full max-w-xs flex-col overflow-y-auto bg-white pb-6 shadow-xl">
               {/* Header with logo and close button */}
               <div className="sticky top-0 z-10 flex items-center justify-between bg-white px-4 py-4 shadow">
-                <div className="flex items-center">
+                <div className="flex items-center overflow-hidden">
                   <Image
                     src={logoSrc}
                     alt="Logo"
-                    width={120}
-                    height={120}
+                    width={200}
+                    height={200}
                     priority
-                    className="h-16 w-auto"
+                    className="h-16 w-auto scale-[200%]"
                   />
                 </div>
                 <button

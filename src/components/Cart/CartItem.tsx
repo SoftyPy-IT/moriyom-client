@@ -120,10 +120,10 @@ const CartItem = () => {
   return (
     <>
       <div className="relative cursor-pointer" onClick={onOpen}>
-        <BagIcon className="w-5 h-5 text-brand-main" />
+        <BagIcon className="w-5 h-5 text-white" />
         {noOfItems > 0 && (
           <span
-            className={`absolute -top-2 -right-2 sm:-top-3 sm:-right-3 text-xs sm:text-sm bg-brand-main text-white px-1 sm:px-2 py-0.5 rounded-full font-medium shadow-md animate-bounce`}
+            className={`absolute -top-2 -right-2 sm:-top-3 sm:-right-3 text-xs sm:text-sm bg-tomato text-white px-1 sm:px-2 py-0.5 rounded-full font-medium shadow-md animate-bounce`}
           >
             {noOfItems}
           </span>

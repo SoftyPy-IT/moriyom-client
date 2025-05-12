@@ -29,7 +29,7 @@ const WishlistIcon = () => {
 
   return (
     <Link href="/wishlist" passHref>
-      <Heart className="w-5 h-5 text-brand-main" />
+      <Heart className="w-5 h-5 text-white" />
       {noOfWishlist > 0 && (
         <span
           className={`${animate} absolute text-xs -top-2.5 sm:-top-3 -right-2.5 sm:-right-3 bg-gray500 text-gray100 py-0.5 sm:py-1 px-1.5 sm:px-2 rounded-full`}

@@ -123,7 +123,7 @@ const TopHeader = ({ session }: TopHeaderProps) => {
   return (
     <div className="fixed w-full z-50 bg-brand-light1 top-0 left-0 transition-colors duration-300">
       {/* Top Section */}
-      <div className="border-b border-brand-light2 bg-header-gradient ">
+      <div className="border-b border-brand-light2 bg-black ">
         <div className="container mx-auto px-4">
           <div className="py-4 lg:py-6 flex items-center justify-between">
             {/* Mobile Menu Toggle */}
@@ -132,7 +132,7 @@ const TopHeader = ({ session }: TopHeaderProps) => {
               className="lg:hidden p-2 hover:bg-brand-light2 rounded-full transition-colors"
               aria-label="Toggle mobile menu"
             >
-              <Menu className="w-6 h-6 text-brand-main " />
+              <Menu className="w-6 h-6 text-white " />
             </button>
             {/* Social Icons - Hidden on Mobile */}
             <div className="hidden lg:flex items-center space-x-4 ">
@@ -140,7 +140,7 @@ const TopHeader = ({ session }: TopHeaderProps) => {
                 <Link
                   key={href}
                   href={href}
-                  className="border rounded border-blue p-0.5 hover:bg-blue/10 transition-colors"
+                  className="border rounded border-blue p-0.5 hover:bg-blue/10 transition-colors bg-white"
                 >
                   <Icon />
                 </Link>
@@ -162,16 +162,16 @@ const TopHeader = ({ session }: TopHeaderProps) => {
                   aria-label="Toggle search"
                 >
                   {showSearch ? (
-                    <X className="w-5 h-5 text-brand-main" />
+                    <X className="w-5 h-5 text-white" />
                   ) : (
-                    <Search className="w-5 h-5 text-brand-main" />
+                    <Search className="w-5 h-5 text-white" />
                   )}
                 </button>
               </div>
 
               {/* Wishlist */}
               <div className="hidden sm:block">
-                <div className="border border-brand-light3 rounded p-1 hover:bg-brand-light2 transition-all">
+                <div className="border border-brand-light3 rounded p-1 hover:bg-brand-light2 transition-all text-white">
                   <WishlistIcon />
                 </div>
               </div>
@@ -251,7 +251,7 @@ const TopHeader = ({ session }: TopHeaderProps) => {
                       className="border border-brand-light3 rounded p-1 hover:bg-brand-light2 transition-all"
                       aria-label="Login"
                     >
-                      <CircleUser className="w-5 h-5 text-brand-main" />
+                      <CircleUser className="w-5 h-5 text-white" />
                     </button>
                   </Link>
                 )}

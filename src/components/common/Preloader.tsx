@@ -9,10 +9,10 @@ const Preloader = () => {
     >
       <div className="flex flex-col items-center">
         <Image
-          src="/logo.png"
+          src="/Logo (2).png"
           alt="Loading"
-          width={120}
-          height={120}
+          width={300}
+          height={300}
           priority
         />
       </div>

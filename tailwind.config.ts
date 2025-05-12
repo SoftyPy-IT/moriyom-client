@@ -16,7 +16,7 @@ const config: Config = {
         current: "currentColor",
         "underline-color": "#yourColor",
         white: "#FFFFFF",
-
+        tomato: '#FB5163',
         gray50: "#F9F9F9",
         gray100: "#EEEEEE",
         gray200: "#ECECEC",

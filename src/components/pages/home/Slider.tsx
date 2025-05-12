@@ -97,7 +97,7 @@ const Slider: React.FC = () => {
             </div>
 
             {/* Gradient Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/70 z-10" />
+            <div className="absolute inset-0 bg-black/40 z-10" />
 
             {/* Content */}
             <div className="relative z-20 h-full flex items-center justify-center text-center px-4 lg:px-20">
@@ -137,7 +137,7 @@ const Slider: React.FC = () => {
                   >
                     <Link
                       href={item.link}
-                      className="group inline-flex items-center px-6 sm:px-8 py-2 sm:py-3 bg-white text-black rounded-full 
+                      className="group inline-flex items-center px-6 sm:px-8 py-2 sm:py-3 bg-tomato text-white rounded-full 
                       hover:bg-opacity-90 transition-all duration-300 
                       font-semibold text-base sm:text-lg tracking-wider"
                     >
