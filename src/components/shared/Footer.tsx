@@ -56,7 +56,7 @@ export default function MegaMenu() {
         { name: "Photos & Videos", href: "#" },
         { name: "Lookbook", href: "#" },
       ],
-      image: "/1.jpg",
+      image: "/Electric-American-Coffee-Machine-–-DUCHESSA.webp",
     },
     {
       title: "CATEGORIES",
@@ -72,7 +72,7 @@ export default function MegaMenu() {
           href: "/products/combo",
         },
       ],
-      image: "/2.jpg",
+      image: "/1673864831400.webp",
     },
     {
       title: "CUSTOMER SERVICE",
@@ -86,7 +86,7 @@ export default function MegaMenu() {
         { name: "Fabric Care", href: "#" },
         { name: "FAQs", href: "/faqs" },
       ],
-      image: "/3.jpg",
+      image: "/80a7fb5b-94c2-4b44-b291-96b32ad0eae6.webp",
     },
     {
       title: "MORE",
@@ -109,7 +109,7 @@ export default function MegaMenu() {
           href: "/site-map",
         },
       ],
-      image: "/4.jpg",
+      image: "/188C.webp",
     },
   ];
 
