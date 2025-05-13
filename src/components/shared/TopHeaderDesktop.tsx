@@ -1,17 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import React from "react";
 import Logo from "../common/Logo";
-import HeaderSearchBar from "./HeaderSearchBar";
 
-import UserAvatar from "./UserAvatar";
-import UserIcon from "./UserIcon";
-import { useAppSelector } from "@/redux/hooks";
 import {
   selectProfile,
   useCurrentToken,
 } from "@/redux/features/auth/authSlice";
+import { useAppSelector } from "@/redux/hooks";
+import UserIcon from "./UserIcon";
 
 const TopHeaderDesktop = () => {
   const user = useAppSelector(selectProfile);
@@ -23,11 +20,6 @@ const TopHeaderDesktop = () => {
           <Logo />
         </Link>
       </div>
-      <HeaderSearchBar
-        onClose={() => {
-          console.log("close");
-        }}
-      />
 
       <div className="hidden space-x-3 lg:relative lg:z-10  lg:flex lg:items-center">
         {isAuthenticated ? (
