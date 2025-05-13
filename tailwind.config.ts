@@ -33,7 +33,8 @@ const config: Config = {
         brand: {
           light1: "#d5e4e9",
           light2: "#cad9de",
-          main: "#134865", // Logo color
+          // main: "#134865", // Logo color
+          main: '#FB5163',
           light3: "#b6c7cc",
         },
       },
