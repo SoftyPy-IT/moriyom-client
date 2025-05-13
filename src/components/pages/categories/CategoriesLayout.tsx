@@ -104,9 +104,9 @@ const CategoriesLayout = ({ slug }: CategoriesLayoutProps) => {
                           img1: product.thumbnail,
                           img2: product?.images && product.images[0],
                           slug: product.slug,
-                          category: product.category.name,
-                          subCategory: product.subCategory.name,
-                          mainCategory: product.mainCategory.name,
+                          category: product.category?.name,
+                          subCategory: product.subCategory?.name,
+                          mainCategory: product.mainCategory?.name,
                           rating: product.rating,
                           reviewCount: product.reviewCount,
                         }}

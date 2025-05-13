@@ -16,7 +16,7 @@ const config: Config = {
         current: "currentColor",
         "underline-color": "#yourColor",
         white: "#FFFFFF",
-        tomato: '#FB5163',
+        tomato: "#FB5163",
         gray50: "#F9F9F9",
         gray100: "#EEEEEE",
         gray200: "#ECECEC",
@@ -34,7 +34,7 @@ const config: Config = {
           light1: "#d5e4e9",
           light2: "#cad9de",
           // main: "#134865", // Logo color
-          main: '#FB5163',
+          main: "#FB5163",
           light3: "#b6c7cc",
         },
       },

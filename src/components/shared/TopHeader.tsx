@@ -154,21 +154,6 @@ const TopHeader = ({ session }: TopHeaderProps) => {
             </div>
             {/* Right Controls */}
             <div className="flex items-center space-x-2 sm:space-x-4">
-              {/* Search */}
-              <div className="header-dropdown relative">
-                <button
-                  className="border border-brand-light3 rounded p-1 hover:bg-brand-light2 transition-all"
-                  onClick={() => setShowSearch(!showSearch)}
-                  aria-label="Toggle search"
-                >
-                  {showSearch ? (
-                    <X className="w-5 h-5 text-white" />
-                  ) : (
-                    <Search className="w-5 h-5 text-white" />
-                  )}
-                </button>
-              </div>
-
               {/* Wishlist */}
               <div className="hidden sm:block">
                 <div className="border border-brand-light3 rounded p-1 hover:bg-brand-light2 transition-all text-white">
@@ -307,9 +292,6 @@ const TopHeader = ({ session }: TopHeaderProps) => {
           ))}
         </ScrollShadow>
       </div>
-
-      {/* Search Overlay */}
-      {showSearch && <HeaderSearchBar onClose={() => setShowSearch(false)} />}
 
       {/* Mobile Menu */}
       <MobileMegaMenu

@@ -1,8 +1,8 @@
-import React, { useMemo, useState, useRef, useEffect, Fragment } from "react";
-import { Popover, Transition } from "@headlessui/react";
+import { Transition } from "@headlessui/react";
+import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Fragment, useEffect, useRef, useState } from "react";
+import HeaderSearchBar from "./HeaderSearchBar";
 
 interface SubCategory {
   _id: string;
@@ -26,7 +26,7 @@ interface Category {
 interface CategoryTree {
   _id: string;
   name: string;
-  image: string;
+  image?: string;
   slug: string;
   categories: {
     category: Category;
@@ -35,7 +35,20 @@ interface CategoryTree {
   }[];
 }
 
-// Helper function to determine the correct link for a category
+interface IProduct {
+  _id: string;
+  name: string;
+  images: string[];
+  price: number;
+  discount_price: number;
+}
+
+type TQueryParam = {
+  name: string;
+  value: string;
+};
+
+// Helper function to get the correct link for a category
 const getCategoryLink = (
   categoryName: string,
   categorySlug: string,
@@ -45,202 +58,206 @@ const getCategoryLink = (
     : `/categories/${categorySlug}`;
 };
 
-// Hover-enabled popover component with improved touch support
-interface HoverPopoverProps {
-  category: CategoryTree;
-}
+// NestedCategoryMenu Component
+const NestedCategoryMenu = ({
+  categories,
+  mainCategorySlug,
+  onClose,
+}: {
+  categories: {
+    category: Category;
+    serial: number;
+    _id: string;
+  }[];
+  mainCategorySlug: string;
+  onClose: () => void;
+}) => {
+  const [expandedCategories, setExpandedCategories] = useState<
+    Record<string, boolean>
+  >({});
 
-const HoverPopover: React.FC<HoverPopoverProps> = ({ category }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const popoverRef = useRef<HTMLDivElement>(null);
-  const buttonRef = useRef<HTMLButtonElement>(null);
-
-  // Delay constants for better UX
-  const OPEN_DELAY = 100;
-  const CLOSE_DELAY = 300;
-
-  let openTimeout = useRef<NodeJS.Timeout | null>(null);
-  let closeTimeout = useRef<NodeJS.Timeout | null>(null);
-
-  // Handle touch events for mobile devices
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (!isOpen) {
-      e.preventDefault();
-      setIsOpen(true);
-    }
+  const toggleCategory = (categoryId: string) => {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [categoryId]: !prev[categoryId],
+    }));
   };
 
-  const handleMouseEnter = () => {
-    if (closeTimeout.current) {
-      clearTimeout(closeTimeout.current);
-      closeTimeout.current = null;
-    }
-
-    if (!isOpen) {
-      openTimeout.current = setTimeout(() => {
-        setIsOpen(true);
-      }, OPEN_DELAY);
-    }
-  };
-
-  const handleMouseLeave = () => {
-    if (openTimeout.current) {
-      clearTimeout(openTimeout.current);
-      openTimeout.current = null;
-    }
-
-    closeTimeout.current = setTimeout(() => {
-      setIsOpen(false);
-    }, CLOSE_DELAY);
-  };
-
-  // Handle clicks outside to close menu
-  useEffect(() => {
-    const handleOutsideClick = (event: MouseEvent) => {
-      if (
-        isOpen &&
-        popoverRef.current &&
-        !popoverRef.current.contains(event.target as Node) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-      if (openTimeout.current) clearTimeout(openTimeout.current);
-      if (closeTimeout.current) clearTimeout(closeTimeout.current);
-    };
-  }, [isOpen]);
-
-  // Handle escape key
-  useEffect(() => {
-    const handleEscapeKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && isOpen) {
-        setIsOpen(false);
-      }
-    };
-
-    document.addEventListener("keydown", handleEscapeKey);
-    return () => {
-      document.removeEventListener("keydown", handleEscapeKey);
-    };
-  }, [isOpen]);
+  // Sort categories by their serial number
+  const sortedCategories = [...categories].sort((a, b) => a.serial - b.serial);
 
   return (
-    <div
-      className="inline-block"
-      ref={popoverRef}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <Popover>
-        {({ open, close }) => (
-          <>
-            <Popover.Button
-              ref={buttonRef}
-              className={`inline-flex uppercase items-center gap-x-1 text-gray-700 hover:text-blue font-medium outline-none transition duration-200 focus:ring-2 focus:ring-blue-300 focus:ring-opacity-50 rounded px-2 py-1 ${
-                isOpen ? "text-blue" : ""
-              }`}
-              onClick={() => setIsOpen(!isOpen)}
-              onTouchStart={handleTouchStart}
-              aria-expanded={isOpen}
-              aria-label={`${category.name} menu`}
-            >
-              {category.name}
-              <ChevronDown
-                className={`h-3 w-3 transition-transform ${
-                  isOpen ? "rotate-180" : ""
-                }`}
-                aria-hidden="true"
-              />
-            </Popover.Button>
+    <div className="py-2 max-h-[80vh] overflow-y-auto">
+      {sortedCategories.map((categoryItem) => {
+        const category = categoryItem.category;
+        const hasSubCategories =
+          category.subCategories && category.subCategories.length > 0;
+        const isExpanded = expandedCategories[category._id];
 
-            <Transition
-              as={Fragment}
-              show={isOpen}
-              enter="transition ease-out duration-200"
-              enterFrom="opacity-0 -translate-y-1"
-              enterTo="opacity-100 translate-y-0"
-              leave="transition ease-in duration-150"
-              leaveFrom="opacity-100 translate-y-0"
-              leaveTo="opacity-0 -translate-y-1"
-            >
-              <Popover.Panel
-                static
-                className="absolute top-full z-10 w-screen max-w-6xl overflow-hidden rounded-lg mx-auto bg-white shadow-lg ring-1 ring-gray-200 left-1/2 transform -translate-x-1/2"
+        return (
+          <div
+            key={category._id}
+            className="border-b border-gray-100 last:border-b-0"
+          >
+            <div className="flex items-center justify-between px-4 py-3">
+              <Link
+                href={
+                  category.name.toUpperCase() === "COMBO"
+                    ? "/products/combo"
+                    : `/categories/${mainCategorySlug}/${category.slug}`
+                }
+                className="text-gray-500 hover:text-tomato transition-colors duration-200 font-medium"
+                onClick={onClose}
               >
-                <div className="grid grid-cols-12 gap-4 p-4 md:p-6">
-                  {/* Left Side - Image (hidden on small screens, span-3 on larger) */}
-                  {category.image && (
-                    <div className="hidden md:block md:col-span-4 lg:col-span-3">
-                      <div className="relative h-64 md:h-80 lg:h-96 w-full overflow-hidden rounded-lg group">
-                        <Image
-                          src={category.image}
-                          alt={category.name}
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                        <div className="absolute bottom-4 left-4">
-                          <p className="text-lg uppercase font-bold text-white">
-                            {category.name}
-                          </p>
-                          <Link
-                            href={getCategoryLink(category.name, category.slug)}
-                            className="text-sm text-white/90 hover:text-white transition duration-200 focus:outline-none focus:underline"
-                            onClick={() => {
-                              setIsOpen(false);
-                              close();
-                            }}
-                          >
-                            View All →
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Right Side - Categories (span-12 on small, span-8/9 on larger) */}
-                  <div
-                    className={`col-span-12 ${
-                      category.image
-                        ? "md:col-span-8 lg:col-span-9"
-                        : "col-span-12"
+                {category.name}
+              </Link>
+              {hasSubCategories && (
+                <button
+                  onClick={() => toggleCategory(category._id)}
+                  className="p-1 text-gray-400 hover:text-tomato focus:outline-none"
+                  aria-expanded={isExpanded}
+                >
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${
+                      isExpanded ? "rotate-180" : ""
                     }`}
-                  >
-                    {category.categories && category.categories.length > 0 && (
-                      <ColumnizedCategories
-                        mainCategorySlug={category.slug}
-                        category={category}
-                        onClose={() => {
-                          setIsOpen(false);
-                          close();
-                        }}
-                      />
-                    )}
-                  </div>
-                </div>
-              </Popover.Panel>
-            </Transition>
-          </>
-        )}
-      </Popover>
+                  />
+                </button>
+              )}
+            </div>
+
+            {/* SubCategories */}
+            {hasSubCategories && isExpanded && (
+              <div className="pl-4 pb-2 bg-gray-50">
+                {category.subCategories &&
+                  category?.subCategories.map((subCat) => (
+                    <Link
+                      key={subCat._id}
+                      href={
+                        subCat.subCategory.name.toUpperCase() === "COMBO"
+                          ? "/products/combo"
+                          : `/categories/${mainCategorySlug}/${category.slug}/${subCat.subCategory.slug}`
+                      }
+                      className="block py-2 px-4 text-gray-400 hover:text-tomato text-sm hover:bg-white transition-colors duration-200"
+                      onClick={onClose}
+                    >
+                      {subCat.subCategory.name}
+                    </Link>
+                  ))}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
 
-export default function ModernMegaMenu({
+// Improved CategoryDropdown Component
+const CategoryDropdown = ({ navigation }: { navigation: CategoryTree[] }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+        setActiveCategory(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, []);
+
+  const handleCategoryHover = (categoryId: string) => {
+    setActiveCategory(categoryId);
+  };
+
+  const handleClose = () => {
+    setIsOpen(false);
+    setActiveCategory(null);
+  };
+
+  return (
+    <div className="relative " ref={dropdownRef}>
+      <button
+        className="flex items-center gap-x-1 px-4 py-2 text-white bg-tomato rounded hover:bg-red-600 transition-colors duration-200 focus:outline-none"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <Menu className="h-5 w-5" />
+        <span>CATEGORIES</span>
+        <ChevronDown
+          className={`h-4 w-4 transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+
+      <Transition
+        show={isOpen}
+        as={Fragment}
+        enter="transition ease-out duration-200"
+        enterFrom="opacity-0 translate-y-1"
+        enterTo="opacity-100 translate-y-0"
+        leave="transition ease-in duration-150"
+        leaveFrom="opacity-100 translate-y-0"
+        leaveTo="opacity-0 translate-y-1"
+      >
+        <div className="absolute left-0 z-50 w-64 mt-2 bg-white rounded-md shadow-lg ring-1 ring-gray-200">
+          {navigation.map((category) => (
+            <div
+              key={category._id}
+              className="border-b border-gray-100 last:border-b-0 relative group"
+              onMouseEnter={() => handleCategoryHover(category._id)}
+              onMouseLeave={() => setActiveCategory(null)}
+            >
+              <div className="px-4 py-3">
+                <Link
+                  href={getCategoryLink(category.name, category.slug)}
+                  className="flex items-center justify-between text-gray-500 hover:text-tomato font-medium"
+                  onClick={handleClose}
+                >
+                  <span>{category.name}</span>
+                  {category.categories && category.categories.length > 0 && (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </Link>
+              </div>
+
+              {/* Nested dropdown for main categories */}
+              {category.categories &&
+                category.categories.length > 0 &&
+                activeCategory === category._id && (
+                  <div className="absolute left-full top-0 w-64 bg-white shadow-lg rounded-md z-50">
+                    <NestedCategoryMenu
+                      categories={category.categories}
+                      mainCategorySlug={category.slug}
+                      onClose={handleClose}
+                    />
+                  </div>
+                )}
+            </div>
+          ))}
+        </div>
+      </Transition>
+    </div>
+  );
+};
+
+// Main Header Component
+export default function ProfessionalHeader({
   navigation,
 }: {
   navigation: CategoryTree[];
 }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   // Close mobile menu when window resizes to desktop size
   useEffect(() => {
@@ -254,225 +271,44 @@ export default function ModernMegaMenu({
     return () => window.removeEventListener("resize", handleResize);
   }, [isMobileMenuOpen]);
 
-  // Close mobile menu when clicking outside
-  useEffect(() => {
-    if (!isMobileMenuOpen) return;
-
-    const handleOutsideClick = (e: MouseEvent) => {
-      const mobileMenu = document.getElementById("mobile-menu");
-      const mobileMenuButton = document.getElementById("mobile-menu-button");
-
-      if (
-        mobileMenu &&
-        mobileMenuButton &&
-        !mobileMenu.contains(e.target as Node) &&
-        !mobileMenuButton.contains(e.target as Node)
-      ) {
-        setIsMobileMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
-  }, [isMobileMenuOpen]);
-
   return (
-    <nav className="relative bg-white">
-      {/* Desktop Navigation */}
-      <div className="hidden lg:block">
-        <div className="container mx-auto">
-          <div className="py-3 px-4">
-            {/* Scrollable Main Navigation - Fixed horizontal scrolling issue */}
-            <div className="flex justify-center">
-              <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
-                <div className="inline-flex items-center text-sm space-x-3 min-w-max">
-                  <Link
-                    href="/"
-                    className="text-gray-700 hover:text-blue font-medium transition duration-200 focus:outline-none focus:text-blue px-2 py-1"
-                  >
-                    HOME
-                  </Link>
-                  <Link
-                    href="/products"
-                    className="text-gray-700 hover:text-blue font-medium transition duration-200 focus:outline-none focus:text-blue px-2 py-1"
-                  >
-                    SHOP
-                  </Link>
-                  <Link
-                    href="/products/combo"
-                    className="text-gray-700 hover:text-blue font-medium transition duration-200 focus:outline-none focus:text-blue px-2 py-1"
-                  >
-                    COMBO
-                  </Link>
+    <header className="bg-white sticky top-0 z-40 w-full">
+      <div className="container mx-auto ">
+        {/* Main Header */}
+        <div className="flex items-center border p-3 justify-between h-16">
+          {/* Logo can go here if needed */}
+          <div className="hidden border lg:block">
+            <CategoryDropdown navigation={navigation} />
+          </div>
 
-                  {navigation?.map((category) => {
-                    // Always show all main categories
-                    const hasContent =
-                      category.categories && category.categories.length > 0;
+          {/* Center - Search */}
+          <div className={`flex-1 mx-4 ${isSearchFocused ? "z-50" : ""}`}>
+            <HeaderSearchBar />
+          </div>
 
-                    return hasContent ? (
-                      // Categories with subcategories get a hover-enabled dropdown mega menu
-                      <HoverPopover key={category._id} category={category} />
-                    ) : (
-                      // Categories with no subcategories just get a regular link
-                      <Link
-                        key={category._id}
-                        href={getCategoryLink(category.name, category.slug)}
-                        className="text-gray-700 uppercase hover:text-blue font-medium transition duration-200 focus:outline-none focus:text-blue px-2 py-1"
-                      >
-                        {category.name}
-                      </Link>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
+          {/* Right Side - Navigation Links */}
+          <div className="hidden lg:flex items-center space-x-6">
+            <Link
+              href="/"
+              className="text-gray-500 hover:text-tomato font-medium transition-colors duration-200"
+            >
+              HOME
+            </Link>
+            <Link
+              href="/products"
+              className="text-gray-500 hover:text-tomato font-medium transition-colors duration-200"
+            >
+              SHOP
+            </Link>
+            <Link
+              href="/products/combo"
+              className="text-gray-500 hover:text-tomato font-medium transition-colors duration-200"
+            >
+              COMBO
+            </Link>
           </div>
         </div>
       </div>
-    </nav>
+    </header>
   );
 }
-
-interface ColumnizedCategoriesProps {
-  mainCategorySlug?: string;
-  category: CategoryTree;
-  onClose: () => void;
-}
-
-const ColumnizedCategories: React.FC<ColumnizedCategoriesProps> = ({
-  mainCategorySlug,
-  category,
-  onClose,
-}) => {
-  // Sort categories by their serial number
-  const sortedCategories = useMemo(
-    () => [...category.categories].sort((a, b) => a.serial - b.serial),
-    [category.categories],
-  );
-
-  // Responsive columns - fewer on smaller screens
-  const columnsCount = 3;
-
-  // Group categories into columns while preserving serial order
-  const categoriesColumns = useMemo(() => {
-    const columns: Category[][] = Array.from(
-      { length: columnsCount },
-      () => [],
-    );
-
-    // Calculate items per column by distributing evenly
-    const totalItems = sortedCategories.length;
-    const itemsPerColumn = Math.ceil(totalItems / columnsCount);
-
-    // Distribute categories across columns in serial order
-    sortedCategories.forEach((item, index) => {
-      // Determine which column this item belongs to
-      const columnIndex = Math.floor(index / itemsPerColumn);
-
-      // Ensure we don't exceed column count (fallback to last column)
-      const targetColumnIndex =
-        columnIndex < columnsCount ? columnIndex : columnsCount - 1;
-
-      // Add the category to the appropriate column
-      columns[targetColumnIndex].push(item.category);
-    });
-
-    return columns;
-  }, [sortedCategories, columnsCount]);
-
-  return (
-    <div className="pl-2 md:pl-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 border-t border-gray-200">
-        {categoriesColumns.map((column, columnIndex) => (
-          <div
-            key={columnIndex}
-            className={`
-              space-y-3
-              py-4
-              px-2
-              ${
-                columnIndex < columnsCount - 1
-                  ? "md:border-r border-gray-200"
-                  : ""
-              }
-            `}
-          >
-            {column.map((category) => (
-              <div key={category._id} className="space-y-2 group">
-                <Link
-                  href={
-                    category.name.toUpperCase() === "COMBO"
-                      ? "/products/combo"
-                      : `/categories/${mainCategorySlug}/${category.slug}`
-                  }
-                  className="
-                    block 
-                    text-sm 
-                    font-semibold 
-                    text-gray-900 
-                    group-hover:text-blue 
-                    transition 
-                    duration-200 
-                    pb-1
-                    border-b 
-                    border-transparent 
-                    group-hover:border-blue
-                    focus:outline-none
-                    focus:text-blue
-                  "
-                  onClick={onClose}
-                >
-                  {category.name.length > 25
-                    ? category.name.slice(0, 25) + "..."
-                    : category.name}
-                </Link>
-
-                {category.subCategories &&
-                  category.subCategories.length > 0 && (
-                    <ul className="space-y-1 mt-2">
-                      {category.subCategories.map((subCat, index) => (
-                        <li
-                          key={subCat._id}
-                          className={`
-                            ${
-                              index < (category.subCategories?.length ?? 0) - 1
-                                ? "border-b border-gray-100"
-                                : ""
-                            }
-                            py-1
-                          `}
-                        >
-                          <Link
-                            href={
-                              subCat.subCategory.name.toUpperCase() === "COMBO"
-                                ? "/products/combo"
-                                : `/categories/${mainCategorySlug}/${category.slug}/${subCat.subCategory.slug}`
-                            }
-                            className="
-                              block 
-                              text-xs 
-                              text-gray-600 
-                              hover:text-blue 
-                              hover:pl-1 
-                              transition-all 
-                              duration-200
-                              focus:outline-none
-                              focus:text-blue
-                            "
-                            onClick={onClose}
-                          >
-                            {subCat.subCategory.name}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-              </div>
-            ))}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
